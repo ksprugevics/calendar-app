@@ -1,0 +1,49 @@
+<bean class="org.thymeleaf.spring4.view.ThymeleafViewResolver">
+  <property name="spring" ref="http://www.springframework.org/tags" />
+  <property name="form" value="http://www.springframework.org/tags/form" />
+</bean>
+<!DOCTYPE html>
+<html xmlns:th="www.tymeleaf.org" lang="en">
+  <head>
+      <meta charset="utf-8">
+      <title>Create an account</title>
+
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+
+  <body>
+
+    <div class="container w-50">
+
+       <br><br><br> <form action="#" method="POST" th:action="@{/registration}" class="form-signin" th:object="${userForm}">
+        <h2 class="form-signin-heading text-center">Create your account</h2><br>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('*')} ? 'has-error' : ''">
+            <input name="username" type="text" class="form-control" placeholder="Username" autofocus="true"/><br>
+            <p class="alert alert-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('*')} ? 'has-error' : ''">
+            <input name="password" type="password" class="form-control" placeholder="Password" autofocus="true"/><br>
+            <p class="alert alert-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        </div>
+
+        <div class="form-group" th:classappend="${#fields.hasErrors('*')} ? 'has-error' : ''">
+            <input name="passwordConfirm" type="password" class="form-control" placeholder="Confirm your password" autofocus="true"/><br>
+            <p class="alert alert-danger" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></p>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button><br>
+        <h6 class="text-center">Already have an account? <a href="/login">Log in now</a></h6>
+
+
+    </form>
+
+    </div>
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

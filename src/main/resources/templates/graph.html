@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<title>Statistics</title>
+</head>
+
+
+<input type="hidden" id="events" th:value="${allEvents}"/>
+
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script type="text/javascript">
+
+
+var allEvents = JSON.parse(document.getElementById("events").value)
+
+
+window.onload = function () {
+	
+	var dataFromEvents =  []; 
+	
+	for (i = 0; i < allEvents.length; i++) { 
+		dataFromEvents[i] = { 	
+								label: allEvents[i].name,
+								y: allEvents[i].eventCount 
+							}
+	}
+	
+	console.log(dataFromEvents);
+	
+	var chart = new CanvasJS.Chart("chartContainer", {
+		title:{
+			text: "Event count in your calendars"              
+		},
+		data: [              
+		{
+			// Change type to "doughnut", "line", "splineArea", etc.
+			type: "column",
+  			//dataPoints : dataFromEvents;
+
+			dataPoints: dataFromEvents
+		}
+		]
+	});
+	chart.render();
+}
+</script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">SimpleCal</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item ">
+        <a class="nav-link" href="/calendar">Calendar </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-event">Add event</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="#">View calendars <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-calendar">Add calendar</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/stat">Statistics</a>
+      </li>
+    </ul>
+    
+     <form id="logoutForm" action="#" method="POST" th:action="@{/logout}" class="form-inline my-2 my-lg-0">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        </form>
+
+        <h6 style="color:white;"> Welcome, <span th:text="${#request.userPrincipal.name}"></span> | <a onclick="document.forms['logoutForm'].submit()">Logout</a></h6>
+    
+    
+  </div>
+</nav>
+
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+</body>
+</html>

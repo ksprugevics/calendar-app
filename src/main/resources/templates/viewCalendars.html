@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="www.tymeleaf.org" lang="en">
+  <head>
+      <meta charset="utf-8">
+      <title>Add an Event</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+
+  <body>
+
+<style>
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">SimpleCal</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item ">
+        <a class="nav-link" href="/calendar">Calendar </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-event">Add event</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="#">View calendars <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-calendar">Add calendar</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/stat">Statistics</a>
+      </li>
+    </ul>
+    
+     <form id="logoutForm" action="#" method="POST" th:action="@{/logout}" class="form-inline my-2 my-lg-0">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        </form>
+
+        <h6 style="color:white;"> Welcome, <span th:text="${#request.userPrincipal.name}"></span> | <a onclick="document.forms['logoutForm'].submit()">Logout</a></h6>
+    
+    
+  </div>
+</nav>
+
+
+    <div class="container w-50 ">
+
+       <br><br><br> <form action="#" th:action="@{/view-calendars}" th:object="${model}" method="post">
+        <h2 class="form-signin-heading text-center">Your calendars</h2><br>
+        
+			      		  <div class="form-group">
+			    <label for="chooseCalendarForm">Choose a calendar</label>
+			    <select  onchange="change(event)" multiple class="form-control" id="calendarSelection" th:value="${calName}" name="calName">
+
+				    </select>
+				  </div>
+				  
+
+   <br>
+       <br> <button  id="viewbtn" class="btn btn-lg btn-primary btn-block" type="submit" name="action" value="view" disabled>View</button>
+         <input id="editbtn" class="btn btn-lg btn-success btn-block" type="button" value="Edit" disabled/>
+    <button id="delbtn" class="btn btn-lg btn-danger btn-block" type="submit" name="action" value="delete" disabled>Delete</button>
+  
+    </form>
+
+
+   
+   
+    </div>
+    
+    
+      <div id="myModal" class="modal">
+
+			  <!-- Modal content -->
+			  <div class="modal-content">
+			    <span class="close">&times;</span>
+			    
+			    <form action="#" th:action="@{/view-calendars}" th:object="${model}" method="post">
+			  Current name:
+			    <input name="currName" type="text" id="currName" th:value="${currName}" readonly/>
+			    New name:
+			    <input name="newName" type="text" th:value="${newName}"/>
+			    <br>
+			   <hr> <button class="btn btn-sm btn-success btn-block" type="submit" name="action" value="edit">Save</button>
+			</form> </div>
+			</div>
+			
+			
+    <input type="hidden" id="calendars" th:value="${calendarList}"/>
+    
+<script>
+function change(e) {
+	document.getElementById("viewbtn").disabled = false;
+	document.getElementById("editbtn").disabled = false;
+	if(document.getElementById("calendarSelection").length > 1) document.getElementById("delbtn").disabled = false;
+	document.getElementById("currName").value = e.target.value
+}
+
+var x = document.getElementById("calendarSelection");
+
+
+var allCalendars = JSON.parse(document.getElementById("calendars").value)
+if(allCalendars.length == 1) document.getElementById("delbtn").disabled = true;
+for(let i = 0; i < allCalendars.length; i++){
+	option = document.createElement("option");
+	option.text = allCalendars[i].title;
+	x.add(option);
+}
+
+</script>
+
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("editbtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+</script>
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>

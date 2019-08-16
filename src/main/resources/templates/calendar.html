@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<title>SimpleCal</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">SimpleCal</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Calendar <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-event">Add event</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/view-calendars">View calendars</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/add-new-calendar">Add calendar</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/stat">Statistics</a>
+      </li>
+    </ul>
+    
+     <form id="logoutForm" action="#" method="POST" th:action="@{/logout}" class="form-inline my-2 my-lg-0">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        </form>
+
+        <h6 style="color:white;"> Welcome, <span th:text="${#request.userPrincipal.name}"></span> | <a onclick="document.forms['logoutForm'].submit()">Logout</a></h6>
+    
+    
+  </div>
+</nav>
+
+
+
+<style>
+.fc-content{
+font-size: 1.5em;
+color: white;
+}
+.fc-event{
+background-color:#007bff;
+}
+a:hover {
+    cursor: pointer;
+}
+.fc-button{
+    background-color: #007bff;
+    background-image: none;
+    color: white;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+<br/>
+<div class="ui container">
+
+<h1 style="color:#007bff" th:inline="text" >
+   Calendar:
+   <small th:text="${calendarName}"></small>
+</h1>
+
+  <div class="ui grid">
+    <div class="ui sixteen column">
+      <div id="calendar"></div>
+    </div>
+  </div>
+</div>
+
+
+<input type="hidden" id="events" th:value="${allEvents}"/>
+
+
+<div id="myModal" class="modal">
+
+			  <!-- Modal content -->
+			  <div class="modal-content w-50">
+			    <span class="close">&times;</span>
+			    <form action="#" th:action="@{/calendar}" th:object="${event}" method="post">
+			    	Title: 
+			    	<span id="evTitle"></span>
+			    	<input name="name" type="hidden" id="newevTitle" th:field="*{name}"/>
+			    	<br>
+			    	Description: 
+			    	 <textarea name="description" id="newevDescription" th:field="*{description}" placeholder="Description..." class="form-control" rows="5" readonly></textarea>
+      		
+			    	<br>
+			    	Type:
+			    	<span id="evType"></span>
+			    	<select id="newevType"  style="visibility:hidden" name="eventType" th:field="*{eventType}" class="form-control"></select>
+			    	<br>
+			    	Date:
+			    	<span id="evDate"></span>
+			    	<input name="oldDate" type="hidden" id="oldDateSbm" th:value="${oldDate}"/>
+			    	<input name="startDate" id="newevDate" type="hidden"  th:field="*{startDate}" /> 
+			    	<input name ="startTime" id="newevTime" type="hidden" th:field="*{startTime}" />
+			    	<br><hr>
+
+			    	<button name="action" class="btn btn-lg btn-success btn-block" id="savebtn" style="visibility:hidden" type="submit" value="edit">Save</button>
+			    	<button name="action" class="btn btn-lg btn-danger btn-block" id="deletebtn" type="submit" value="delete">Delete</button>
+			    	<input onclick="editEvent()" id="editbtn" class="btn btn-lg btn-primary btn-block" type="button" value="Edit"/>
+			    	</form>
+			  </div>
+			</div>
+			
+<input type="hidden" id="eventTypes" th:value="${eventTypes}"/>
+		
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.1.0/fullcalendar.min.js"></script>
+<script th:inline="javascript">
+$(document).ready(function() {
+	var all = JSON.parse($("#events").val());
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,basicWeek,basicDay'
+        },
+        navLinks: true, // can click day/week names to navigate views
+        editable: false,
+        eventLimit: true, // allow "more" link when too many events
+        timeFormat: 'H:mm',
+        events: all,
+        eventRender: function(info, el, view) {
+        		
+        		var modal = document.getElementById("myModal");
+					
+					// Get the <span> element that closes the modal
+					var span = document.getElementsByClassName("close")[0];
+					
+					// When the user clicks the button, open the modal 
+					
+					
+					switch(info.type) {
+					  case "Birthday":
+					    el[0].style.backgroundColor = "#00b300"
+					    break;
+					  case "Appointment":
+						  el[0].style.backgroundColor = "#0099cc"
+					    break;
+					  case "Lecture":
+						  el[0].style.backgroundColor = "#cc00cc"
+					    break;
+					  case "Reminder":
+						  el[0].style.backgroundColor = "#e6b800"
+					    break;
+					  case "Meeting":
+						  el[0].style.backgroundColor = "#ff5050"
+					    break;
+					}
+					
+					el[0].onclick = function() {
+					  modal.style.display = "block";
+					  document.getElementById("evTitle").textContent = info.title
+					  document.getElementById("newevDescription").value = info.description
+					  document.getElementById("evType").textContent = info.type
+					  document.getElementById("evDate").textContent = info.start._i
+					  
+					  var oldDate = document.getElementById("evDate")
+					document.getElementById("oldDateSbm").value = oldDate.textContent
+
+					}
+					
+					// When the user clicks on <span> (x), close the modal
+					span.onclick = function() {
+					  modal.style.display = "none";
+					}
+					
+					// When the user clicks anywhere outside of the modal, close it
+					window.onclick = function(event) {
+					  if (event.target == modal) {
+					    modal.style.display = "none";
+					  }
+					}
+
+          	},
+        
+    });
+    
+    //loading event types
+    var y = document.getElementById("newevType");
+
+    var allEventTypesS = document.getElementById("eventTypes").value;
+    allEventTypes = allEventTypesS.replace(' ','').replace('[','').replace(']','').split(",");
+    for(let k = 0; k < allEventTypes.length;k++){
+    	option = document.createElement("option");
+    	option.text = allEventTypes[k];
+    	y.add(option);
+    }
+    
+});
+
+function editEvent(){
+	var newTitle = document.getElementById("newevTitle")
+	var oldTitle = document.getElementById("evTitle")
+	newTitle.type = "text"
+	oldTitle.style.display = "none"
+	newTitle.value  = oldTitle.textContent 
+	
+	document.getElementById("newevDescription").removeAttribute('readonly');
+	
+	var newType = document.getElementById("newevType")
+	var oldType = document.getElementById("evType")
+	newType.style.visibility = "visible"
+	oldType.style.display = "none"
+	newType.value  = oldType.textContent
+	
+	
+	var newTime = document.getElementById("newevTime")
+	var newDate = document.getElementById("newevDate")
+	var oldDate = document.getElementById("evDate")
+	newTime.type = "time"
+	newDate.type = "date"
+	oldDate.style.display = "none"
+	var dateTime = oldDate.textContent .split("T");
+	newTime.value  = dateTime[1]
+	newDate.value = dateTime[0]
+	
+	document.getElementById("editbtn").style.visibility = "hidden"
+	document.getElementById("savebtn").style.visibility = "visible"
+
+}
+</script>
+</body>
+</html>
+
